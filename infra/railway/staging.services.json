@@ -1,0 +1,62 @@
+{
+  "format": "project-manual-deployment-manifest-v1",
+  "notice": "Review and enter these settings manually. This is not a Railway apply/config file and provisions nothing.",
+  "environment": "staging",
+  "rootDirectory": "/",
+  "automaticDeployments": false,
+  "serverlessSleeping": false,
+  "restartPolicy": "ON_FAILURE",
+  "restartMaxRetries": 5,
+  "healthcheckTimeoutSeconds": 300,
+  "ownerInputs": {
+    "projectId": null,
+    "sourceBranchOrCommit": null,
+    "region": null,
+    "webDomain": null,
+    "apiDomain": null,
+    "monthlyBudget": null,
+    "usageAlertThreshold": null,
+    "hardLimit": null
+  },
+  "services": [
+    {
+      "name": "web",
+      "dockerfile": "infra/railway/Dockerfile.web",
+      "startCommand": "node node_modules/next/dist/bin/next start --hostname 0.0.0.0",
+      "replicas": 1,
+      "public": true,
+      "healthcheckPath": "/",
+      "preDeployCommand": null
+    },
+    {
+      "name": "api",
+      "dockerfile": "infra/railway/Dockerfile.api",
+      "startCommand": "node dist/main.js",
+      "replicas": 1,
+      "public": true,
+      "healthcheckPath": "/health/ready",
+      "preDeployCommand": "node dist/database/migrate.js"
+    },
+    {
+      "name": "worker",
+      "dockerfile": "infra/railway/Dockerfile.worker",
+      "startCommand": "node dist/consumer.js",
+      "replicas": 1,
+      "public": false,
+      "healthcheckPath": "/health/ready",
+      "preDeployCommand": null
+    },
+    {
+      "name": "scheduler",
+      "dockerfile": "infra/railway/Dockerfile.worker",
+      "startCommand": "node dist/scheduler.js",
+      "replicas": 1,
+      "public": false,
+      "healthcheckPath": "/health/ready",
+      "preDeployCommand": null
+    }
+  ],
+  "privateDependencies": ["PostgreSQL", "Redis", "ClamAV", "Mailpit staging sink"],
+  "objectStorage": "Isolated private Railway Bucket using its issued HTTPS S3 endpoint; not a fabricated railway.internal endpoint",
+  "activationGate": "Do not start scheduler/consumers, configure Meta callbacks or seed provider assets until the owner authorizes the exact staging environment and data."
+}

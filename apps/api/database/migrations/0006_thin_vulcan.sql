@@ -1,0 +1,1 @@
+ALTER TABLE "app"."contact_import_errors" ADD CONSTRAINT "contact_import_errors_import_row_code_key" UNIQUE("import_id","row_number","error_code");

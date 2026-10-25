@@ -1,0 +1,18 @@
+# Build from repository root, not apps/api; workspace dependencies must stay available.
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+RUN npm install --global pnpm@11.25.0
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm exec turbo run build --filter=@whatsapp-platform/api...
+RUN pnpm --filter @whatsapp-platform/api deploy --prod --legacy /out/api
+
+FROM node:24-bookworm-slim AS runtime
+RUN apt-get update && apt-get upgrade --yes && apt-get clean
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build --chown=node:node /out/api /app/apps/api
+USER node
+WORKDIR /app/apps/api
+# Migration is a separate controlled pre-deploy operation, never process startup.
+CMD ["node", "dist/main.js"]

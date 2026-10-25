@@ -1,0 +1,83 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791569220343,
+      "tag": "0000_initial_mvp_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791638802600,
+      "tag": "0001_manual_payment_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791800000000,
+      "tag": "0002_webhook_outbox_claims",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791810000000,
+      "tag": "0003_contacts_cursor_listing",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791820000000,
+      "tag": "0004_bumpy_puppet_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791820000001,
+      "tag": "0005_plain_dreadnoughts",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791820000002,
+      "tag": "0006_thin_vulcan",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791898336567,
+      "tag": "0007_campaign_preflight",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792061375910,
+      "tag": "0008_campaign_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792421134780,
+      "tag": "0009_initial_password_change",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792592705430,
+      "tag": "0010_encrypted_provider_credentials",
+      "breakpoints": true
+    }
+  ]
+}

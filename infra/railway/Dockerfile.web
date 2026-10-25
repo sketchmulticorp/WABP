@@ -1,0 +1,24 @@
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+RUN npm install --global pnpm@11.25.0
+COPY . .
+RUN pnpm install --frozen-lockfile
+# This is public browser configuration, never a database/provider secret.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Fixed upstream address only; never put credentials in this build argument.
+ARG API_PROXY_URL
+ENV API_PROXY_URL=$API_PROXY_URL
+RUN node -e "const v=process.env.NEXT_PUBLIC_API_URL;if(v!=='/api/v1'){const u=new URL(v);if(u.protocol!=='https:'||u.pathname!=='/api/v1'||u.username||u.password||u.search||u.hash)throw new Error('Set HTTPS API URL ending in /api/v1, or /api/v1 with API_PROXY_URL')}"
+RUN pnpm exec turbo run build --filter=@whatsapp-platform/web...
+RUN pnpm --filter @whatsapp-platform/web deploy --prod --legacy /out/web
+
+FROM node:24-bookworm-slim AS runtime
+RUN apt-get update && apt-get upgrade --yes && apt-get clean
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build --chown=node:node /out/web /app/apps/web
+USER node
+WORKDIR /app/apps/web
+# Next reads Railway's PORT directly; do not reuse the local script's fixed port 3000.
+CMD ["node", "node_modules/next/dist/bin/next", "start", "--hostname", "0.0.0.0"]

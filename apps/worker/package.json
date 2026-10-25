@@ -1,0 +1,55 @@
+{
+  "name": "@whatsapp-platform/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --env-file-if-exists=../../.env node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
+    "lint": "eslint src --max-warnings=0",
+    "lint:fix": "eslint src --fix --max-warnings=0",
+    "start": "node --env-file-if-exists=../../.env dist/main.js",
+    "start:consumer": "node dist/consumer.js",
+    "start:scheduler": "node dist/scheduler.js",
+    "test:readiness": "pnpm run build && node --test dist/health/worker-health.test.js",
+    "test": "pnpm run build && node --test dist/automation/automation-transport.service.test.js dist/webhooks/webhook-event.service.test.js dist/imports/contact-import.service.test.js dist/messaging/message-delivery.service.test.js dist/messaging/message-outbox.service.test.js dist/campaigns/campaign-preflight.service.test.js dist/campaigns/campaign-preflight-outbox.service.test.js dist/health/worker-health.test.js",
+    "webhook:replay": "pnpm run build && node --env-file-if-exists=../../.env dist/webhooks/replay-webhook.js",
+    "message:replay": "pnpm run build && node --env-file-if-exists=../../.env dist/messaging/replay-message.js",
+    "automation:replay": "pnpm run build && node --env-file-if-exists=../../.env dist/automation/replay-automation.js",
+    "test:messaging:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/messaging/message-delivery.integration.test.js",
+    "test:phase5:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/campaigns/campaign-phase5.integration.test.js",
+    "test:inbox:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/webhooks/inbox-webhook.integration.test.js",
+    "test:automation": "pnpm run build && node --test dist/automation/automation-transport.service.test.js",
+    "test:automation:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/automation/automation-queue.integration.test.js dist/automation/automation-database.integration.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@whatsapp-platform/api": "workspace:*",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@whatsapp-platform/config": "workspace:*",
+    "@whatsapp-platform/contact-normalization": "workspace:*",
+    "@whatsapp-platform/observability": "workspace:*",
+    "@whatsapp-platform/storage": "workspace:*",
+    "bullmq": "^6.3.12",
+    "csv-parse": "^7.0.3",
+    "exceljs": "^4.4.0",
+    "nestjs-pino": "catalog:",
+    "pg": "^8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "yauzl": "^3.4.0",
+    "@whatsapp-platform/whatsapp-provider": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "catalog:",
+    "@types/node": "catalog:",
+    "@types/pg": "^8.23.1",
+    "@types/yauzl": "^3.4.0",
+    "tsx": "4.23.15",
+    "typescript": "catalog:"
+  }
+}

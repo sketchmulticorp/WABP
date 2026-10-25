@@ -1,0 +1,181 @@
+{
+  "schema": "app",
+  "tableCount": 35,
+  "tables": [
+    { "name": "plans", "file": "010_plans.sql", "domain": "plans", "deletion": "status" },
+    { "name": "tenants", "file": "020_tenants.sql", "domain": "tenancy", "deletion": "soft" },
+    {
+      "name": "subscriptions",
+      "file": "030_subscriptions.sql",
+      "domain": "plans",
+      "deletion": "status"
+    },
+    { "name": "roles", "file": "040_roles.sql", "domain": "authorization", "deletion": "soft" },
+    {
+      "name": "permissions",
+      "file": "050_permissions.sql",
+      "domain": "authorization",
+      "deletion": "immutable"
+    },
+    {
+      "name": "role_permissions",
+      "file": "060_role_permissions.sql",
+      "domain": "authorization",
+      "deletion": "assignment"
+    },
+    { "name": "users", "file": "070_users.sql", "domain": "identity", "deletion": "soft" },
+    {
+      "name": "payment_records",
+      "file": "035_payment_records.sql",
+      "domain": "billing",
+      "deletion": "append-only"
+    },
+    {
+      "name": "user_tenant_scopes",
+      "file": "080_user_tenant_scopes.sql",
+      "domain": "authorization",
+      "deletion": "soft"
+    },
+    {
+      "name": "auth_sessions",
+      "file": "090_auth_sessions.sql",
+      "domain": "identity",
+      "deletion": "expiry-revocation"
+    },
+    {
+      "name": "whatsapp_accounts",
+      "file": "100_whatsapp_accounts.sql",
+      "domain": "whatsapp",
+      "deletion": "status"
+    },
+    {
+      "name": "provider_credentials",
+      "file": "110_provider_credentials.sql",
+      "domain": "whatsapp",
+      "deletion": "status"
+    },
+    { "name": "contacts", "file": "120_contacts.sql", "domain": "contacts", "deletion": "soft" },
+    {
+      "name": "contact_groups",
+      "file": "130_contact_groups.sql",
+      "domain": "contacts",
+      "deletion": "soft"
+    },
+    {
+      "name": "contact_group_members",
+      "file": "140_contact_group_members.sql",
+      "domain": "contacts",
+      "deletion": "soft"
+    },
+    {
+      "name": "contact_imports",
+      "file": "150_contact_imports.sql",
+      "domain": "imports",
+      "deletion": "retention"
+    },
+    {
+      "name": "contact_import_errors",
+      "file": "160_contact_import_errors.sql",
+      "domain": "imports",
+      "deletion": "retention"
+    },
+    { "name": "templates", "file": "170_templates.sql", "domain": "templates", "deletion": "soft" },
+    { "name": "campaigns", "file": "180_campaigns.sql", "domain": "campaigns", "deletion": "soft" },
+    {
+      "name": "campaign_preflight_runs",
+      "file": "205_campaign_preflight_runs.sql",
+      "domain": "campaigns",
+      "deletion": "retention"
+    },
+    {
+      "name": "conversations",
+      "file": "190_conversations.sql",
+      "domain": "inbox",
+      "deletion": "status"
+    },
+    {
+      "name": "messages",
+      "file": "200_messages.sql",
+      "domain": "messaging",
+      "deletion": "retention"
+    },
+    {
+      "name": "campaign_recipients",
+      "file": "210_campaign_recipients.sql",
+      "domain": "campaigns",
+      "deletion": "retention"
+    },
+    {
+      "name": "conversation_notes",
+      "file": "220_conversation_notes.sql",
+      "domain": "inbox",
+      "deletion": "retention"
+    },
+    {
+      "name": "automation_flows",
+      "file": "230_automation_flows.sql",
+      "domain": "automation",
+      "deletion": "soft"
+    },
+    {
+      "name": "automation_versions",
+      "file": "240_automation_versions.sql",
+      "domain": "automation",
+      "deletion": "immutable"
+    },
+    {
+      "name": "automation_nodes",
+      "file": "250_automation_nodes.sql",
+      "domain": "automation",
+      "deletion": "immutable"
+    },
+    {
+      "name": "automation_edges",
+      "file": "260_automation_edges.sql",
+      "domain": "automation",
+      "deletion": "immutable"
+    },
+    {
+      "name": "automation_runs",
+      "file": "270_automation_runs.sql",
+      "domain": "automation",
+      "deletion": "retention"
+    },
+    {
+      "name": "media_assets",
+      "file": "280_media_assets.sql",
+      "domain": "media",
+      "deletion": "soft"
+    },
+    {
+      "name": "webhook_events",
+      "file": "290_webhook_events.sql",
+      "domain": "webhooks",
+      "deletion": "retention"
+    },
+    {
+      "name": "usage_events",
+      "file": "300_usage_events.sql",
+      "domain": "usage",
+      "deletion": "append-only"
+    },
+    {
+      "name": "audit_logs",
+      "file": "310_audit_logs.sql",
+      "domain": "audit",
+      "deletion": "append-only"
+    },
+    {
+      "name": "idempotency_keys",
+      "file": "320_idempotency_keys.sql",
+      "domain": "reliability",
+      "deletion": "expiry"
+    },
+    {
+      "name": "outbox_events",
+      "file": "330_outbox_events.sql",
+      "domain": "events",
+      "deletion": "retention"
+    }
+  ]
+}

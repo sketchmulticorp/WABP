@@ -1,0 +1,83 @@
+{
+  "name": "@whatsapp-platform/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist",
+    "database/migrations"
+  ],
+  "exports": {
+    "./provider-credentials": {
+      "types": "./dist/whatsapp/credentials/index.d.ts",
+      "import": "./dist/whatsapp/credentials/index.js"
+    },
+    "./automation-runtime": {
+      "types": "./dist/automation/automation-runtime.module.d.ts",
+      "import": "./dist/automation/automation-runtime.module.js"
+    },
+    "./campaign-runtime": {
+      "types": "./dist/campaigns/campaign-runtime.module.d.ts",
+      "import": "./dist/campaigns/campaign-runtime.module.js"
+    }
+  },
+  "scripts": {
+    "test:super-admin": "npm run test:password-change && node --test dist/platform/super-admin/super-admin.test.js",
+    "test:super-admin:integration": "npm run test:password-change:integration",
+    "test:onboarding": "npm run build && node --test dist/whatsapp/signup/embedded-signup.test.js",
+    "test:onboarding:integration": "npm run test:password-change:integration",
+    "test:password-change:integration": "npm run build && node --test dist/auth/password-change/password-change.integration.test.js",
+    "test:password-change": "npm run build && node --test dist/auth/password-change/password-change.dto.test.js dist/auth/password-change/password-change.service.test.js dist/auth/auth.service.test.js dist/auth/auth.security.test.js dist/authorization/authorization.service.test.js dist/me/me.service.test.js",
+    "build": "tsc -p tsconfig.json",
+    "db:check": "drizzle-kit check --config=drizzle.config.ts",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "tsx --env-file-if-exists=../../.env src/database/migrate.ts",
+    "db:seed": "tsx --env-file-if-exists=../../.env src/database/seed.ts",
+    "dev": "node --env-file-if-exists=../../.env node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
+    "lint": "eslint src --max-warnings=0",
+    "lint:fix": "eslint src --fix --max-warnings=0",
+    "start": "node --env-file-if-exists=../../.env dist/main.js",
+    "test": "pnpm run build && node --test dist/common/errors/error-response.factory.test.js dist/automation/automation.validation.test.js dist/automation/automation-http.config.test.js dist/campaigns/campaign-lifecycle.service.test.js dist/campaigns/campaign.service.test.js dist/app.integration.test.js dist/auth/auth.security.test.js dist/auth/auth.service.test.js dist/authorization/authorization.service.test.js dist/common/security/password-hasher.test.js dist/contacts/contact.service.test.js dist/groups/group.service.test.js dist/health/health.service.test.js dist/imports/contact-import.service.test.js dist/me/me.service.test.js dist/messaging/messaging.service.test.js dist/templates/template.service.test.js dist/webhooks/webhook.service.test.js dist/whatsapp/environment-credential-reference.resolver.test.js dist/whatsapp/meta-provider.config.test.js dist/whatsapp/whatsapp-provider.error.test.js dist/whatsapp/whatsapp.service.test.js dist/insights/insights.test.js",
+    "test:campaigns:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/campaigns/campaign.integration.test.js",
+    "test:automation": "pnpm run build && node --test dist/automation/automation.validation.test.js dist/automation/automation-http.config.test.js dist/common/errors/error-response.factory.test.js",
+    "test:automation:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/automation/automation.integration.test.js dist/automation/automation-runtime.integration.test.js dist/automation/automation-http.integration.test.js",
+    "test:inbox:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/conversations/conversation.integration.test.js",
+    "test:database": "pnpm run build && pnpm run db:migrate && node --test dist/database/database.integration.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:insights": "pnpm run build && node --test dist/insights/insights.test.js",
+    "test:insights:integration": "pnpm run build && node --env-file-if-exists=../../.env --test dist/insights/insights.integration.test.js dist/insights/insights.http.integration.test.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "@whatsapp-platform/contact-normalization": "workspace:*",
+    "@whatsapp-platform/config": "workspace:*",
+    "@whatsapp-platform/contracts": "workspace:*",
+    "@whatsapp-platform/observability": "workspace:*",
+    "@whatsapp-platform/storage": "workspace:*",
+    "csv-parse": "^7.0.3",
+    "drizzle-orm": "^0.45.4",
+    "exceljs": "^4.4.0",
+    "express": "5.2.1",
+    "ioredis": "^6.0.0",
+    "multer": "^2.4.0",
+    "nestjs-pino": "catalog:",
+    "pg": "^8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "yauzl": "^3.4.0",
+    "@whatsapp-platform/whatsapp-provider": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "catalog:",
+    "@types/multer": "^2.3.0",
+    "@types/node": "catalog:",
+    "@types/express": "5.0.6",
+    "@types/pg": "^8.23.1",
+    "@types/yauzl": "^3.4.0",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "4.23.15",
+    "typescript": "catalog:"
+  }
+}

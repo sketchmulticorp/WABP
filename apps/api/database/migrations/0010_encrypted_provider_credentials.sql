@@ -1,0 +1,2 @@
+ALTER TABLE "app"."provider_credentials" ADD COLUMN "encrypted_token" text;--> statement-breakpoint
+ALTER TABLE "app"."provider_credentials" ADD CONSTRAINT "provider_credentials_storage_check" CHECK ((encrypted_token IS NULL AND secret_ref NOT LIKE 'encrypted://%') OR (encrypted_token IS NOT NULL AND secret_ref = 'encrypted://' || id::text));

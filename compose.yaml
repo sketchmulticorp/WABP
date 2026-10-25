@@ -1,0 +1,383 @@
+name: whatsapp-saas-local
+
+x-server-environment: &server-environment
+  NODE_ENV: production
+  APP_MODE: full
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  WEB_PUBLIC_URL: http://localhost:${WEB_PORT:-3000}
+  API_PUBLIC_URL: http://localhost:${API_PORT:-4000}
+  CORS_ALLOWED_ORIGINS: http://localhost:${WEB_PORT:-3000}
+  HTTP_TRUST_PROXY_HOPS: ${HTTP_TRUST_PROXY_HOPS:-0}
+  DATABASE_URL: postgresql://${POSTGRES_USER:-whatsapp}:${POSTGRES_PASSWORD:-whatsapp_local_only}@postgres:5432/${POSTGRES_DB:-whatsapp_saas}
+  DATABASE_POOL_MIN: ${DATABASE_POOL_MIN:-2}
+  DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+  REDIS_URL: redis://redis:6379
+  QUEUE_PREFIX: ${QUEUE_PREFIX:-whatsapp-saas-local-compose}
+  # These fallbacks are intentionally local-only and keep a fresh Compose stack bootable.
+  # Override every credential below in .env before any real Meta test.
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-local-compose-jwt-secret-never-deploy-0001}
+  REFRESH_TOKEN_PEPPER: ${REFRESH_TOKEN_PEPPER:-local-compose-refresh-pepper-never-deploy-0002}
+  DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-local-compose-data-key-never-deploy-0003}
+  WHATSAPP_ONBOARDING_MODE: ${WHATSAPP_ONBOARDING_MODE:-development}
+  WHATSAPP_CREDENTIAL_KEYRING: ${WHATSAPP_CREDENTIAL_KEYRING:-}
+  WHATSAPP_CREDENTIAL_ACTIVE_KEY_ID: ${WHATSAPP_CREDENTIAL_ACTIVE_KEY_ID:-}
+  META_EMBEDDED_SIGNUP_CONFIG_ID: ${META_EMBEDDED_SIGNUP_CONFIG_ID:-}
+  META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION:-v0.0}
+  META_APP_ID: ${META_APP_ID:-local-compose-provider-disabled}
+  META_APP_SECRET: ${META_APP_SECRET:-local-compose-provider-disabled-secret}
+  META_WEBHOOK_VERIFY_TOKEN: ${META_WEBHOOK_VERIFY_TOKEN:-local-compose-webhook-disabled-token}
+  META_DEVELOPMENT_ACCESS_TOKEN: ${META_DEVELOPMENT_ACCESS_TOKEN:-}
+  S3_ENDPOINT: http://minio:9000
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_BUCKET: ${S3_BUCKET:-whatsapp-saas-local}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-whatsapp_local_access}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-whatsapp_local_secret}
+  S3_FORCE_PATH_STYLE: "true"
+  CLAMAV_HOST: clamav
+  CLAMAV_PORT: "3310"
+  CLAMAV_TIMEOUT_MS: ${CLAMAV_TIMEOUT_MS:-120000}
+  SMTP_HOST: mailpit
+  SMTP_PORT: "1025"
+  SMTP_SECURE: "false"
+  SMTP_FROM: ${SMTP_FROM:-no-reply@whatsapp-saas.local}
+  MAX_IMPORT_FILE_BYTES: ${MAX_IMPORT_FILE_BYTES:-10485760}
+  MAX_IMPORT_FILE_ROWS: ${MAX_IMPORT_FILE_ROWS:-10000}
+  IMPORT_RETENTION_DAYS: ${IMPORT_RETENTION_DAYS:-30}
+  MAX_MEDIA_FILE_BYTES: ${MAX_MEDIA_FILE_BYTES:-16777216}
+  WEBHOOK_RELAY_POLL_INTERVAL_MS: ${WEBHOOK_RELAY_POLL_INTERVAL_MS:-1000}
+  WEBHOOK_QUEUE_CONCURRENCY: ${WEBHOOK_QUEUE_CONCURRENCY:-5}
+  WEBHOOK_MAX_ATTEMPTS: ${WEBHOOK_MAX_ATTEMPTS:-5}
+  WEBHOOK_RETRY_BASE_DELAY_MS: ${WEBHOOK_RETRY_BASE_DELAY_MS:-1000}
+  WEBHOOK_OUTBOX_LOCK_TIMEOUT_SECONDS: ${WEBHOOK_OUTBOX_LOCK_TIMEOUT_SECONDS:-60}
+  IMPORT_RELAY_POLL_INTERVAL_MS: ${IMPORT_RELAY_POLL_INTERVAL_MS:-1000}
+  IMPORT_QUEUE_CONCURRENCY: ${IMPORT_QUEUE_CONCURRENCY:-1}
+  IMPORT_MAX_ATTEMPTS: ${IMPORT_MAX_ATTEMPTS:-3}
+  IMPORT_RETRY_BASE_DELAY_MS: ${IMPORT_RETRY_BASE_DELAY_MS:-5000}
+  IMPORT_OUTBOX_LOCK_TIMEOUT_SECONDS: ${IMPORT_OUTBOX_LOCK_TIMEOUT_SECONDS:-300}
+  IMPORT_PROCESSING_TIMEOUT_SECONDS: ${IMPORT_PROCESSING_TIMEOUT_SECONDS:-900}
+  MESSAGE_RELAY_POLL_INTERVAL_MS: ${MESSAGE_RELAY_POLL_INTERVAL_MS:-1000}
+  MESSAGE_QUEUE_CONCURRENCY: ${MESSAGE_QUEUE_CONCURRENCY:-10}
+  MESSAGE_OUTBOX_LOCK_TIMEOUT_SECONDS: ${MESSAGE_OUTBOX_LOCK_TIMEOUT_SECONDS:-60}
+  MESSAGE_MAX_ATTEMPTS: ${MESSAGE_MAX_ATTEMPTS:-5}
+  MESSAGE_RETRY_BASE_DELAY_MS: ${MESSAGE_RETRY_BASE_DELAY_MS:-1000}
+  JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
+  REFRESH_TOKEN_TTL_SECONDS: ${REFRESH_TOKEN_TTL_SECONDS:-2592000}
+  AUTH_LOGIN_WINDOW_SECONDS: ${AUTH_LOGIN_WINDOW_SECONDS:-900}
+  AUTH_LOGIN_IP_LIMIT: ${AUTH_LOGIN_IP_LIMIT:-100}
+  AUTH_LOGIN_EMAIL_LIMIT: ${AUTH_LOGIN_EMAIL_LIMIT:-10}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+
+services:
+  web:
+    image: whatsapp-saas/web-local:latest
+    build:
+      context: .
+      dockerfile: infra/railway/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: /api/v1
+        API_PROXY_URL: http://api:4000/api/v1
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      NEXT_PUBLIC_API_URL: /api/v1
+      API_PROXY_URL: http://api:4000/api/v1
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - development
+
+  api:
+    image: whatsapp-saas/api-local:latest
+    build:
+      context: .
+      dockerfile: infra/railway/Dockerfile.api
+    restart: unless-stopped
+    environment:
+      <<: *server-environment
+      PORT: "4000"
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      clamav:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - development
+
+  worker:
+    image: whatsapp-saas/worker-local:latest
+    build:
+      context: .
+      dockerfile: infra/railway/Dockerfile.worker
+    restart: unless-stopped
+    command: ["node", "dist/consumer.js"]
+    environment:
+      <<: *server-environment
+      PORT: "4001"
+    ports:
+      - "127.0.0.1:${WORKER_HEALTH_PORT:-4001}:4001"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4001/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - development
+
+  scheduler:
+    image: whatsapp-saas/worker-local:latest
+    restart: unless-stopped
+    command: ["node", "dist/scheduler.js"]
+    environment:
+      <<: *server-environment
+      PORT: "4002"
+    ports:
+      - "127.0.0.1:${SCHEDULER_HEALTH_PORT:-4002}:4002"
+    depends_on:
+      worker:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4002/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - development
+
+  migrate:
+    image: whatsapp-saas/api-local:latest
+    build:
+      context: .
+      dockerfile: infra/railway/Dockerfile.api
+    profiles: ["operations"]
+    restart: "no"
+    command: ["node", "dist/database/migrate.js"]
+    environment:
+      <<: *server-environment
+      PORT: "4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - development
+
+  seed:
+    image: whatsapp-saas/api-local:latest
+    profiles: ["operations"]
+    restart: "no"
+    command: ["node", "dist/database/seed.js"]
+    environment:
+      <<: *server-environment
+      PORT: "4000"
+      SEED_SUPER_ADMIN_EMAIL: ${SEED_SUPER_ADMIN_EMAIL:-}
+      SEED_SUPER_ADMIN_DISPLAY_NAME: ${SEED_SUPER_ADMIN_DISPLAY_NAME:-}
+      SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
+      SEED_TENANT_NAME: ${SEED_TENANT_NAME:-}
+      SEED_TENANT_SLUG: ${SEED_TENANT_SLUG:-}
+      SEED_TENANT_TIMEZONE: ${SEED_TENANT_TIMEZONE:-}
+      SEED_TENANT_COUNTRY_CODE: ${SEED_TENANT_COUNTRY_CODE:-}
+      SEED_TENANT_ADMIN_EMAIL: ${SEED_TENANT_ADMIN_EMAIL:-}
+      SEED_TENANT_ADMIN_DISPLAY_NAME: ${SEED_TENANT_ADMIN_DISPLAY_NAME:-}
+      SEED_TENANT_ADMIN_PASSWORD: ${SEED_TENANT_ADMIN_PASSWORD:-}
+      SEED_TENANT_USER_EMAIL: ${SEED_TENANT_USER_EMAIL:-}
+      SEED_TENANT_USER_DISPLAY_NAME: ${SEED_TENANT_USER_DISPLAY_NAME:-}
+      SEED_TENANT_USER_PASSWORD: ${SEED_TENANT_USER_PASSWORD:-}
+      SEED_PLAN_MAX_USERS: ${SEED_PLAN_MAX_USERS:-100}
+      SEED_PLAN_MAX_WHATSAPP_NUMBERS: ${SEED_PLAN_MAX_WHATSAPP_NUMBERS:-10}
+      SEED_PLAN_MAX_CONTACTS: ${SEED_PLAN_MAX_CONTACTS:-100000}
+      SEED_PLAN_MONTHLY_MESSAGE_LIMIT: ${SEED_PLAN_MONTHLY_MESSAGE_LIMIT:-1000000}
+      SEED_PLAN_MONTHLY_CAMPAIGN_LIMIT: ${SEED_PLAN_MONTHLY_CAMPAIGN_LIMIT:-10000}
+      SEED_PLAN_MAX_TEMPLATES: ${SEED_PLAN_MAX_TEMPLATES:-1000}
+      SEED_PLAN_STORAGE_GB: ${SEED_PLAN_STORAGE_GB:-100}
+      SEED_PLAN_AUTOMATION_ENABLED: ${SEED_PLAN_AUTOMATION_ENABLED:-true}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - development
+
+  postgres:
+    image: postgres:16.15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-whatsapp_saas}
+      POSTGRES_USER: ${POSTGRES_USER:-whatsapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-whatsapp_local_only}
+    ports:
+      # Infrastructure ports are loopback-only so development credentials are not exposed to the LAN.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - development
+
+  redis:
+    image: redis:7.4.11-alpine
+    restart: unless-stopped
+    # AOF keeps queued development jobs available across ordinary container restarts.
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - development
+
+  minio:
+    # Community Edition images are no longer published, so this local-only image is built from
+    # MinIO's archived source at the immutable commit for its final Community Edition release.
+    image: whatsapp-saas/minio-dev:01ce918d8279
+    build:
+      context: ./infra/minio
+      args:
+        MINIO_COMMIT: 01ce918d8279a20e4706b96a64396146894adee4
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-whatsapp_local_access}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-whatsapp_local_secret}
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - development
+
+  minio-init:
+    image: amazon/aws-cli:2.36.42
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-whatsapp_local_access}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-whatsapp_local_secret}
+      AWS_DEFAULT_REGION: ${S3_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET:-whatsapp-saas-local}
+    entrypoint: ["/bin/sh", "-c"]
+    # Bucket creation is idempotent, which keeps every startup safe and repeatable.
+    command:
+      - >-
+        aws --endpoint-url http://minio:9000 s3api head-bucket --bucket "$${S3_BUCKET}" 2>/dev/null ||
+        aws --endpoint-url http://minio:9000 s3api create-bucket --bucket "$${S3_BUCKET}"
+    networks:
+      - development
+
+  clamav:
+    # Official ClamAV image, pinned to a concrete engine release for repeatable local scans.
+    image: clamav/clamav:1.5.4-debian
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CLAMAV_PORT:-3310}:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD-SHELL", "clamdscan --ping 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    networks:
+      - development
+
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    restart: unless-stopped
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: ${MAILPIT_MAX_MESSAGES:-500}
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    volumes:
+      - mailpit_data:/data
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - development
+
+networks:
+  development:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  clamav_data:
+  mailpit_data:

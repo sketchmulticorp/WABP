@@ -1,0 +1,17 @@
+# Scheduler and worker use the same artifact; Railway selects the explicit start command.
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+RUN npm install --global pnpm@11.25.0
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm exec turbo run build --filter=@whatsapp-platform/worker...
+RUN pnpm --filter @whatsapp-platform/worker deploy --prod --legacy /out/worker
+
+FROM node:24-bookworm-slim AS runtime
+RUN apt-get update && apt-get upgrade --yes && apt-get clean
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build --chown=node:node /out/worker /app/apps/worker
+USER node
+WORKDIR /app/apps/worker
+CMD ["node", "dist/consumer.js"]

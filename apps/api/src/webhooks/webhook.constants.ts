@@ -1,0 +1,1 @@
+export const META_WEBHOOK_CONFIG = Symbol("META_WEBHOOK_CONFIG");

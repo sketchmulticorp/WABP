@@ -1,0 +1,1 @@
+ALTER TABLE "app"."contact_imports" ADD COLUMN "storage_deleted_at" timestamp with time zone;

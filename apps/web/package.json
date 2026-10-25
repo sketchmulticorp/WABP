@@ -1,0 +1,31 @@
+{
+  "name": "@whatsapp-platform/web",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    ".next",
+    "next.config.mjs",
+    "public"
+  ],
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "lint": "eslint next.config.mjs app features/auth features/profile features/preview features/campaigns features/templates features/whatsapp features/inbox features/automation features/insights features/users features/workspace --max-warnings=0",
+    "lint:fix": "eslint next.config.mjs app features/auth features/profile features/preview features/campaigns features/templates features/whatsapp features/inbox features/automation features/insights features/users features/workspace --fix --max-warnings=0",
+    "start": "next start --port 3000",
+    "test": "node --test",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@whatsapp-platform/contracts": "workspace:*",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "catalog:"
+  }
+}

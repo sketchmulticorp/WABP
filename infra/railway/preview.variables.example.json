@@ -1,0 +1,32 @@
+{
+  "notice": "Documentation only. Replace placeholders privately; do not apply raw examples or commit secrets. Preview uses four services: Postgres, Redis, API and Web.",
+  "api": {
+    "APP_MODE": "preview",
+    "NODE_ENV": "production",
+    "PORT": "8080",
+    "DATABASE_URL": "<PRIVATE_POSTGRES_REFERENCE>",
+    "DATABASE_POOL_MIN": "0",
+    "DATABASE_POOL_MAX": "5",
+    "REDIS_URL": "<PRIVATE_REDIS_REFERENCE>",
+    "QUEUE_PREFIX": "whatsapp-preview",
+    "JWT_ACCESS_SECRET": "<DISTINCT_RANDOM_SECRET_MIN_32_CHARACTERS>",
+    "REFRESH_TOKEN_PEPPER": "<DISTINCT_RANDOM_SECRET_MIN_32_CHARACTERS>",
+    "WEB_PUBLIC_URL": "https://app.preview.example.invalid",
+    "API_PUBLIC_URL": "https://app.preview.example.invalid",
+    "CORS_ALLOWED_ORIGINS": "https://app.preview.example.invalid",
+    "HTTP_TRUST_PROXY_HOPS": "0"
+  },
+  "web": {
+    "NODE_ENV": "production",
+    "PORT": "8080",
+    "NEXT_PUBLIC_API_URL": "/api/v1",
+    "API_PROXY_URL": "http://api.railway.internal:8080/api/v1"
+  },
+  "gates": [
+    "Web domain is a placeholder. Verify the real API private hostname/port; both Web URL variables are build inputs and need a fresh build when changed. See ADR-025.",
+    "Trust proxy 0 is fail-safe, not verification of Railway client IP topology.",
+    "Do not deploy Worker/Scheduler or configure provider webhooks in preview.",
+    "No S3, SMTP, Meta or encryption-key settings required for this reduced profile.",
+    "Use existing Dockerfiles, migrations and explicit seed; no automatic cloud actions."
+  ]
+}

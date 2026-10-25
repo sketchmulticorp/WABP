@@ -1,0 +1,50 @@
+{
+  "notice": "Documentation template, NOT automatically applied. Replace every placeholder in Railway; never save real secrets here. Shared server keys go to api/worker/scheduler, never web.",
+  "serverShared": {
+    "NODE_ENV": "production",
+    "LOG_LEVEL": "info",
+    "WEB_PUBLIC_URL": "https://app.staging.example.invalid",
+    "API_PUBLIC_URL": "https://api.staging.example.invalid",
+    "CORS_ALLOWED_ORIGINS": "https://app.staging.example.invalid",
+    "HTTP_TRUST_PROXY_HOPS": "0",
+    "DATABASE_URL": "<PRIVATE_POSTGRES_CONNECTION_REFERENCE>",
+    "DATABASE_POOL_MIN": "0",
+    "DATABASE_POOL_MAX": "5",
+    "REDIS_URL": "<PRIVATE_REDIS_CONNECTION_REFERENCE>",
+    "QUEUE_PREFIX": "whatsapp-staging",
+    "JWT_ACCESS_SECRET": "<GENERATE_IN_SECRET_STORE_MIN_32_CHARACTERS>",
+    "REFRESH_TOKEN_PEPPER": "<GENERATE_DISTINCT_SECRET_MIN_32_CHARACTERS>",
+    "DATA_ENCRYPTION_KEY": "<GENERATE_DISTINCT_SECRET_MIN_32_CHARACTERS>",
+    "META_GRAPH_API_VERSION": "<OWNER_VERIFIED_SUPPORTED_VERSION>",
+    "META_APP_ID": "<STAGING_META_APP_ID>",
+    "META_APP_SECRET": "<STAGING_META_APP_SECRET>",
+    "META_WEBHOOK_VERIFY_TOKEN": "<STAGING_RANDOM_VERIFY_TOKEN>",
+    "S3_ENDPOINT": "<ISSUED_BUCKET_HTTPS_BASE_ENDPOINT>",
+    "S3_REGION": "<ISSUED_BUCKET_REGION>",
+    "S3_BUCKET": "<ISOLATED_STAGING_BUCKET_NAME>",
+    "S3_ACCESS_KEY_ID": "<STAGING_BUCKET_ACCESS_KEY>",
+    "S3_SECRET_ACCESS_KEY": "<STAGING_BUCKET_SECRET>",
+    "S3_FORCE_PATH_STYLE": "false",
+    "CLAMAV_HOST": "${{clamav.RAILWAY_PRIVATE_DOMAIN}}",
+    "CLAMAV_PORT": "3310",
+    "CLAMAV_TIMEOUT_MS": "120000",
+    "SMTP_HOST": "${{mailpit.RAILWAY_PRIVATE_DOMAIN}}",
+    "SMTP_PORT": "1025",
+    "SMTP_SECURE": "false",
+    "SMTP_FROM": "no-reply@staging.example.invalid"
+  },
+  "webOnly": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_API_URL": "https://api.staging.example.invalid/api/v1",
+    "RAILWAY_DOCKERFILE_PATH": "infra/railway/Dockerfile.web"
+  },
+  "apiOnly": { "RAILWAY_DOCKERFILE_PATH": "infra/railway/Dockerfile.api" },
+  "workerAndScheduler": { "RAILWAY_DOCKERFILE_PATH": "infra/railway/Dockerfile.worker" },
+  "ownerGates": [
+    "Railway supplies PORT separately for each application; do not put local ports in shared variables.",
+    "HTTP_TRUST_PROXY_HOPS=0 is a fail-safe placeholder, not verified Railway client-IP configuration. Verify ingress before enabling login traffic.",
+    "Do not set META_DEVELOPMENT_ACCESS_TOKEN, subscribe webhooks or add provider accounts until separately authorized.",
+    "Domain, project, region, alert recipient/threshold and hard-limit values remain owner supplied.",
+    "Bootstrap SEED_* values are temporary one-time operation secrets, not shared steady-state variables."
+  ]
+}
