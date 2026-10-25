@@ -1,0 +1,10 @@
+**/.next/
+**/.turbo/
+**/coverage/
+**/dist/
+**/node_modules/
+**/*.md
+.env*
+!.env.example
+pnpm-lock.yaml
+work/
